@@ -24,6 +24,18 @@ const char* menuItems[] =
     "No Blood"
 };
 
+bool isToggle[] =
+{
+    true,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true
+};
+
 int menuSize = 8;
 
 void notify(const char* text)
@@ -33,6 +45,11 @@ void notify(const char* text)
     UI::_DRAW_NOTIFICATION(false, false);
 }
 
+std::string checkbox(bool enabled)
+{
+    return enabled ? "[X] " : "[ ] ";
+}
+
 void drawMenu()
 {
     float x = 0.02f;
@@ -40,8 +57,8 @@ void drawMenu()
 
     UI::SET_TEXT_FONT(0);
     UI::SET_TEXT_SCALE(0.35f, 0.35f);
-    UI::SET_TEXT_COLOUR(255,255,255,255);
 
+    UI::SET_TEXT_COLOUR(255,255,255,255);
     UI::BEGIN_TEXT_COMMAND_DISPLAY_TEXT("STRING");
     UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME("Phantom Trainer");
     UI::END_TEXT_COMMAND_DISPLAY_TEXT(x,y-0.05f);
@@ -53,12 +70,23 @@ void drawMenu()
         else
             UI::SET_TEXT_COLOUR(255,255,255,255);
 
-        std::string item = menuItems[i];
+        std::string item;
 
-        if (i == 0) item += godMode ? " [ON]" : " [OFF]";
-        if (i == 5) item += noReload ? " [ON]" : " [OFF]";
-        if (i == 6) item += invincibleCar ? " [ON]" : " [OFF]";
-        if (i == 7) item += noBlood ? " [ON]" : " [OFF]";
+        if (isToggle[i])
+        {
+            bool state = false;
+
+            if (i == 0) state = godMode;
+            if (i == 5) state = noReload;
+            if (i == 6) state = invincibleCar;
+            if (i == 7) state = noBlood;
+
+            item = checkbox(state) + menuItems[i];
+        }
+        else
+        {
+            item = std::string("-> ") + menuItems[i];
+        }
 
         UI::BEGIN_TEXT_COMMAND_DISPLAY_TEXT("STRING");
         UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(item.c_str());
@@ -90,7 +118,7 @@ void tpMission()
 
     if (!UI::DOES_BLIP_EXIST(blip))
     {
-        notify("~r~No mission objective");
+        notify("~r~No mission objective active");
         return;
     }
 
@@ -99,7 +127,7 @@ void tpMission()
     PED player = PLAYER::PLAYER_PED_ID();
     ENTITY::SET_ENTITY_COORDS(player, coords.x, coords.y, coords.z + 1, true, false, false, true);
 
-    notify("Teleported to objective");
+    notify("Teleported to mission objective");
 }
 
 void tpPersonalCar()
@@ -117,14 +145,12 @@ void tpPersonalCar()
     }
     else
     {
-        notify("~r~No personal vehicle found");
+        notify("~r~Personal vehicle not found");
     }
 }
 
 void handleSelection()
 {
-    PED player = PLAYER::PLAYER_PED_ID();
-
     switch(menuIndex)
     {
         case 0:
@@ -194,7 +220,7 @@ void main()
             if (IsKeyJustUp(VK_UP))
             {
                 menuIndex--;
-                if (menuIndex < 0) menuIndex = menuSize-1;
+                if (menuIndex < 0) menuIndex = menuSize - 1;
             }
 
             if (IsKeyJustUp(VK_DOWN))
@@ -225,9 +251,7 @@ void main()
         }
 
         if (noBlood)
-        {
             PED::CLEAR_PED_BLOOD_DAMAGE(player);
-        }
 
         WAIT(0);
     }
