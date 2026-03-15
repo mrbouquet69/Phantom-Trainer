@@ -1,2 +1,5 @@
-# Phantom-Trainer
-A WIP Minimalist Trainer for GTA V.
+# Info
+This is a WIP Minimalist Trainer for GTA V Singeplayer
+
+# Dependencies
+[Script Hook V](https://www.dev-c.com/gtav/scripthookv/)
